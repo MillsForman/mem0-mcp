@@ -1,0 +1,4 @@
+.env
+    git add Dockerfile .gitignore # Ensure .env is gitignored
+    git commit -m "feat: Add Dockerfile for App Runner deployment"
+    git push origin main # Or your default branch
