@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "@aws-cdk/aws-apprunner": "^1.203.0"
+  }
+}
