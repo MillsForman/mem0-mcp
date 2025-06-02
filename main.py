@@ -9,6 +9,7 @@ from mem0 import MemoryClient
 from dotenv import load_dotenv
 import json
 import os
+import asyncio
 
 load_dotenv()
 
@@ -165,12 +166,19 @@ def create_starlette_app(mcp_server: Server, *, debug: bool = False) -> Starlett
                 mcp_server.create_initialization_options(),
             )
 
+    async def startup_event():
+        """A small delay on startup to allow other initializations to complete."""
+        print("MCP Server: Running startup_event with a short delay...")
+        await asyncio.sleep(2) # Sleep for 2 seconds
+        print("MCP Server: Startup delay complete.")
+
     return Starlette(
         debug=debug,
         routes=[
             Route("/sse", endpoint=handle_sse),
             Mount("/messages/", app=sse.handle_post_message),
         ],
+        on_startup=[startup_event]
     )
 
 
