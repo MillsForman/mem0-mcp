@@ -43,7 +43,7 @@ class CdkStack(Stack):
         env_vars_list = [
             apprunner.CfnService.KeyValuePairProperty(
                 name="MEM0_API_KEY",
-                value=mem0_api_key_secret.secret_value.unsafe_unwrap()
+                value=mem0_api_key_secret.secret_value_from_json("mem0_MCP_API_KEY").unsafe_unwrap()
             ),
             apprunner.CfnService.KeyValuePairProperty(
                 name="MEM0_ORG_ID",
