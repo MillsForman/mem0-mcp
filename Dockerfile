@@ -21,5 +21,5 @@ COPY . .
 # Expose the port the app runs on (default is 8080 for mem0-mcp)
 EXPOSE 8080
 
-# Define the command to run the application
-CMD ["sh", "-c", "echo 'DEBUG_STEP_1: CMD started' >&2 ; sleep 5 ; echo 'DEBUG_STEP_2: Listing environment variables:' >&2 && env >&2 && echo 'DEBUG_STEP_3: Starting application main.py...' >&2 && (uv run main.py --host 0.0.0.0 --port 8080 || echo \"DEBUG_STEP_4: main.py crashed with exit code $?\" >&2) && echo 'DEBUG_STEP_5: Application CMD finished, sleeping.' >&2 && sleep infinity"]
+# Standard CMD for running the Uvicorn server directly
+CMD ["uv", "run", "main.py", "--host", "0.0.0.0", "--port", "8080"]

@@ -16,7 +16,7 @@ class CdkStack(Stack):
     def __init__(self, scope: Construct, construct_id: str, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
-        image_asset = ecr_assets.DockerImageAsset(self, "Mem0McpServerImageAssetV2",
+        image_asset = ecr_assets.DockerImageAsset(self, "Mem0McpServerImageAssetV3",
             directory=os.path.join(os.path.dirname(__file__), "..", "..") # Points to the project root
         )
 
