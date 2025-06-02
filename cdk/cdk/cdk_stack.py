@@ -94,11 +94,10 @@ class CdkStack(Stack):
             instance_configuration=instance_config,
             health_check_configuration=apprunner.CfnService.HealthCheckConfigurationProperty(
                 protocol="TCP",
-                port="8080",
                 healthy_threshold=2,
                 unhealthy_threshold=5,
                 interval=10, # Default is 5 seconds
                 timeout=5, # Default is 2 seconds
-                health_check_grace_period_seconds=120 # Increased grace period to 2 minutes
+                healthCheckGracePeriodSeconds=120 # Corrected parameter name
             )
         )
