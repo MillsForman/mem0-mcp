@@ -42,7 +42,7 @@ jobs:
       - name: Install Python dependencies (including for CDK app)
         run: |
           python -m pip install --upgrade pip uv
-          uv pip install -e .  # Installs project and its deps from pyproject.toml
+          uv pip install --system -e .  # Added --system flag to install in the GitHub Actions Python environment
 
       - name: CDK Bootstrap
         env:
