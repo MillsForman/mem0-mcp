@@ -129,9 +129,9 @@
     *   **Virtual CPU & Memory:** Defaults (e.g., 1 vCPU, 2 GB RAM).
     *   **Port:** `8080`.
     *   **Environment variables:**
-        *   `MEM0_API_KEY`: `your_actual_mem0_platform_api_key`
+        *   `MEM0_API_KEY`: `m0-QQ2AeGRgQRbsz0hbIbFzflW7A2F80cii7geFdo6B`
         *   `MEM0_ORG_ID`: `org_6c7gYKa25e2wgGq9rexDAsWFEllT5p4YB49pcGKu`
-        *   `MEM0_PROJECT_ID`: `proj_XYo87A5MWDlOEk1Gwf1tpJuAbICDsGIpkPDB0PhP`
+        *   `MEM0_PROJECT_ID`: `proj_tuMFnQ6FBFYPsSKKq5gLe0uNHqrRRzakDoWmGS0a`
         *   `PYTHONUNBUFFERED`: `1`
         *   `HOST`: `0.0.0.0` (though `CMD` in Dockerfile sets this)
         *   Consider using AWS Secrets Manager integration for App Runner for `MEM0_API_KEY` for better security later.

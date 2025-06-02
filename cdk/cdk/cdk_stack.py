@@ -1,27 +1,41 @@
+#!/usr/bin/env python3
+
+# Temporarily modified for import testing
+import aws_cdk.aws_apprunner as apprunner
+print(f"AppRunner CfnService type: {type(apprunner.CfnService)}")
+print(f"AppRunner InstanceConfigurationProperty type: {type(apprunner.CfnService.InstanceConfigurationProperty)}")
+
+# Check if InstanceConfigurationProperty is a class and has an __init__ method
+if isinstance(apprunner.CfnService.InstanceConfigurationProperty, type):
+    print(f"InstanceConfigurationProperty has __init__: {'__init__' in dir(apprunner.CfnService.InstanceConfigurationProperty)}")
+    # Further, let's try to see the signature if it's from the inspect module
+    try:
+        import inspect
+        print(f"InstanceConfigurationProperty __init__ signature: {inspect.signature(apprunner.CfnService.InstanceConfigurationProperty.__init__)}")
+    except Exception as e:
+        print(f"Could not get __init__ signature: {e}")
+else:
+    print("InstanceConfigurationProperty is not a class type.")
+
+
 from aws_cdk import (
-    # Duration,
     Stack,
-    # aws_sqs as sqs,
     aws_apprunner as apprunner,
-    aws_ecr_assets as ecr_assets, # Import ECR assets module
-    aws_iam as iam  # Import IAM module
+    aws_ecr_assets as ecr_assets,
+    aws_iam as iam,
+    aws_secretsmanager as secretsmanager
 )
 from constructs import Construct
-import os # Import os module for path manipulation
+import os
 
 class CdkStack(Stack):
-
     def __init__(self, scope: Construct, construct_id: str, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
-        # Build and push Docker image from the root Dockerfile
-        # The path to the Dockerfile is relative to the cdk.json file (i.e., cdk/ directory)
-        # So, '../' goes up one level to the project root.
         image_asset = ecr_assets.DockerImageAsset(self, "Mem0McpServerImageAsset",
             directory=os.path.join(os.path.dirname(__file__), "..", "..") # Points to the project root
         )
 
-        # Create an IAM role for App Runner to access ECR (this might be simplified if CDK handles it with assets)
         app_runner_ecr_access_role = iam.Role(
             self, "AppRunnerECRAccessRole",
             assumed_by=iam.ServicePrincipal("build.apprunner.amazonaws.com"),
@@ -30,36 +44,52 @@ class CdkStack(Stack):
             ]
         )
         
-        # Grant the App Runner service principal pull access to the ECR asset repository
-        # This is often handled automatically by CDK when using DockerImageAsset with AppRunner,
-        # but explicitly granting can resolve potential permission issues.
         image_asset.repository.grant_pull(iam.ServicePrincipal("build.apprunner.amazonaws.com"))
 
+        mem0_api_key_secret = secretsmanager.Secret.from_secret_name_v2(
+            self, "Mem0ApiKeySecretLookup", 
+            secret_name="mem0_MCP_API_KEY"
+        )
 
-        # Create the App Runner service from the ECR image asset
+        # Define Instance Configuration separately
+        # For aws-cdk-lib==2.198.0, environment_variables are NOT part of InstanceConfigurationProperty
+        instance_config = apprunner.CfnService.InstanceConfigurationProperty(
+            cpu="1 vCPU",
+            memory="2 GB"
+        )
+
+        # Environment variables are set in ImageConfigurationProperty for this CDK version
+        env_vars_list = [
+            apprunner.CfnService.KeyValuePairProperty(
+                name="MEM0_API_KEY",
+                value=mem0_api_key_secret.secret_value.unsafe_unwrap()
+            ),
+            apprunner.CfnService.KeyValuePairProperty(
+                name="MEM0_ORG_ID",
+                value="org_6c7gYKa25e2wgGq9rexDAsWFEllT5p4YB49pcGKu"
+            ),
+            apprunner.CfnService.KeyValuePairProperty(
+                name="MEM0_PROJECT_ID",
+                value="proj_tuMFnQ6FBFYPsSKKq5gLe0uNHqrRRzakDoWmGS0a"
+            )
+        ]
+
         app_runner_service = apprunner.CfnService(
             self, "MyAppRunnerService",
             source_configuration=apprunner.CfnService.SourceConfigurationProperty(
                 image_repository=apprunner.CfnService.ImageRepositoryProperty(
-                    image_identifier=image_asset.image_uri,  # Use the URI from the image asset
+                    image_identifier=image_asset.image_uri,
                     image_repository_type="ECR",
                     image_configuration=apprunner.CfnService.ImageConfigurationProperty(
-                        port="8080" # Assuming your app listens on port 8080
+                        port="8080", 
+                        runtime_environment_variables=env_vars_list # Correctly placed here
                     )
                 ),
-                auto_deployments_enabled=True, # Set to False if you want to manually trigger deployments
+                auto_deployments_enabled=True,
                 authentication_configuration=apprunner.CfnService.AuthenticationConfigurationProperty(
-                    access_role_arn=app_runner_ecr_access_role.role_arn # This role allows App Runner to pull from ECR
+                    access_role_arn=app_runner_ecr_access_role.role_arn
                 )
             ),
-            service_name="mem0-mcp-app-runner-service", # Choose a unique name
-            instance_configuration=apprunner.CfnService.InstanceConfigurationProperty(
-                cpu="1 vCPU",
-                memory="2 GB"
-            )
-            # Add health check configuration if needed
-            # health_check_configuration=apprunner.CfnService.HealthCheckConfigurationProperty(
-            #     protocol="TCP", # or "HTTP"
-            #     port="8080"
-            # )
+            service_name="mem0-mcp-app-runner-service",
+            instance_configuration=instance_config
         )

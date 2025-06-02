@@ -8,14 +8,36 @@ import uvicorn
 from mem0 import MemoryClient
 from dotenv import load_dotenv
 import json
+import os
 
 load_dotenv()
 
 # Initialize FastMCP server for mem0 tools
 mcp = FastMCP("mem0-mcp")
 
+# Get credentials from environment variables
+env_api_key = os.getenv("MEM0_API_KEY")
+env_org_id = os.getenv("MEM0_ORG_ID")
+env_project_id = os.getenv("MEM0_PROJECT_ID")
+
+# Validate that they exist - App Runner should ensure these are present based on CDK
+if not env_api_key:
+    # This will cause the application to crash early if the key isn't there,
+    # which is good for diagnosis.
+    raise ValueError("FATAL: MEM0_API_KEY environment variable not set or empty in App Runner!")
+if not env_org_id:
+    # Similarly, if these are expected by the client constructor with the given API key.
+    raise ValueError("FATAL: MEM0_ORG_ID environment variable not set or empty in App Runner!")
+if not env_project_id:
+    raise ValueError("FATAL: MEM0_PROJECT_ID environment variable not set or empty in App Runner!")
+
 # Initialize mem0 client and set default user
-mem0_client = MemoryClient()
+# Pass the credentials explicitly to the constructor
+mem0_client = MemoryClient(
+    api_key=env_api_key,
+    org_id=env_org_id,
+    project_id=env_project_id
+)
 DEFAULT_USER_ID = "cursor_mcp"
 CUSTOM_INSTRUCTIONS = """
 Extract the Following Information:  
