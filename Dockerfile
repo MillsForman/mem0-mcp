@@ -22,4 +22,4 @@ COPY . .
 EXPOSE 8080
 
 # Define the command to run the application
-CMD ["uv", "run", "main.py", "--host", "0.0.0.0", "--port", "8080"]
+CMD ["sh", "-c", "echo 'DEBUG: Listing environment variables:' && env && echo 'DEBUG: Starting application main.py...' && (uv run main.py --host 0.0.0.0 --port 8080 || echo 'DEBUG: main.py crashed with exit code $?') && echo 'DEBUG: Application CMD finished, sleeping to keep container alive for debugging.' && sleep infinity"]
