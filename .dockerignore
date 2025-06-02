@@ -1,0 +1,13 @@
+Dockerfile
+.dockerignore
+.git
+.gitignore
+.venv
+cdk/.venv
+cdk/cdk.out
+node_modules
+npm-debug.log
+README.md
+*.pyc
+*.pyo
+__pycache__ 

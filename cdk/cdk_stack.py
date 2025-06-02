@@ -1,29 +1,24 @@
-   from aws_cdk import (
-       core,
-       aws_apprunner as apprunner,
-       aws_ecr as ecr,
-   )
+import sys
+print(f"Python sys.path: {sys.path}")
 
-   class MyAppRunnerStack(core.Stack):
-       def __init__(self, scope: core.Construct, id: str, **kwargs) -> None:
-           super().__init__(scope, id, **kwargs)
+from aws_cdk import App, Stack
+# from aws_cdk import aws_apprunner as apprunner  # Comment out for now
+# from aws_cdk import aws_ecr as ecr            # Comment out for now
+from constructs import Construct
 
-           # Define your ECR repository (if using a Docker image)
-           repository = ecr.Repository.from_repository_name(self, "MyRepo", "mem0-mcp-server")
+class MyMinimalStack(Stack):
+    def __init__(self, scope: Construct, id: str, **kwargs) -> None:
+        super().__init__(scope, id, **kwargs)
+        # No resources defined for this minimal test
 
-           # Create the App Runner service
-           service = apprunner.CfnService(
-               self, "MyAppRunnerService",
-               source_configuration={
-                   "image_repository": {
-                       "image_identifier": f"{repository.repository_uri}:latest",
-                       "image_repository_type": "ECR",
-                   },
-                   "auto_deployments_enabled": True,
-               },
-               service_name="mem0-mcp-service",
-               instance_configuration={
-                   "cpu": "1 vCPU",
-                   "memory": "2 GB",
-               },
-           )
+app = App()
+MyMinimalStack(app, "MyMinimalStackName")
+# app.synth() # Removed for CLI synthesis
+
+# Note: The App instantiation and app.synth() for programmatic synthesis
+# have been removed as per the plan to revert to CLI-based synthesis.
+# The CDK CLI will look for an App instance defined in the global scope
+# or a cdk.json file specifying the app entry point.
+# For this to work with the CLI, we need to add:
+# app = App()
+# MyAppRunnerStack(app, "MyAppRunnerStackName")
