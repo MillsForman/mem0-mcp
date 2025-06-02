@@ -1,22 +1,6 @@
 #!/usr/bin/env python3
 
-# Temporarily modified for import testing
-import aws_cdk.aws_apprunner as apprunner
-print(f"AppRunner CfnService type: {type(apprunner.CfnService)}")
-print(f"AppRunner InstanceConfigurationProperty type: {type(apprunner.CfnService.InstanceConfigurationProperty)}")
-
-# Check if InstanceConfigurationProperty is a class and has an __init__ method
-if isinstance(apprunner.CfnService.InstanceConfigurationProperty, type):
-    print(f"InstanceConfigurationProperty has __init__: {'__init__' in dir(apprunner.CfnService.InstanceConfigurationProperty)}")
-    # Further, let's try to see the signature if it's from the inspect module
-    try:
-        import inspect
-        print(f"InstanceConfigurationProperty __init__ signature: {inspect.signature(apprunner.CfnService.InstanceConfigurationProperty.__init__)}")
-    except Exception as e:
-        print(f"Could not get __init__ signature: {e}")
-else:
-    print("InstanceConfigurationProperty is not a class type.")
-
+# Cleaned up: Removed temporary import testing and debugging prints
 
 from aws_cdk import (
     Stack,
@@ -51,14 +35,11 @@ class CdkStack(Stack):
             secret_name="mem0_MCP_API_KEY"
         )
 
-        # Define Instance Configuration separately
-        # For aws-cdk-lib==2.198.0, environment_variables are NOT part of InstanceConfigurationProperty
         instance_config = apprunner.CfnService.InstanceConfigurationProperty(
             cpu="1 vCPU",
             memory="2 GB"
         )
 
-        # Environment variables are set in ImageConfigurationProperty for this CDK version
         env_vars_list = [
             apprunner.CfnService.KeyValuePairProperty(
                 name="MEM0_API_KEY",
@@ -82,7 +63,7 @@ class CdkStack(Stack):
                     image_repository_type="ECR",
                     image_configuration=apprunner.CfnService.ImageConfigurationProperty(
                         port="8080", 
-                        runtime_environment_variables=env_vars_list # Correctly placed here
+                        runtime_environment_variables=env_vars_list
                     )
                 ),
                 auto_deployments_enabled=True,
@@ -96,8 +77,8 @@ class CdkStack(Stack):
                 protocol="TCP",
                 healthy_threshold=2,
                 unhealthy_threshold=5,
-                interval=10, # Default is 5 seconds
-                timeout=5, # Default is 2 seconds
-                healthCheckGracePeriodSeconds=120 # Corrected parameter name
+                interval=10,
+                timeout=5
+                # healthCheckGracePeriodSeconds parameter removed as it's not supported
             )
         )
