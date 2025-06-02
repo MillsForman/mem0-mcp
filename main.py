@@ -1,3 +1,5 @@
+# Trivial change to force Docker image rebuild for CDK
+
 from mcp.server.fastmcp import FastMCP
 from starlette.applications import Starlette
 from mcp.server.sse import SseServerTransport
